@@ -1,0 +1,11 @@
+*_results.csv
+*.cache.json
+
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+.DS_Store
+.vscode/
+.idea/
