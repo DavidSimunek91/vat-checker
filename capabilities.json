@@ -1,0 +1,353 @@
+{
+  "tool": "vat-checker",
+  "schema_version": 1,
+  "purpose": "Bulk-verify EU VAT IDs against VIES with retries, pacing, caching and local pre-validation.",
+  "not_a": [
+    "company register lookup",
+    "credit or risk check",
+    "source of business activity (NACE) data"
+  ],
+  "source": {
+    "name": "EU VIES",
+    "protocol": "SOAP checkVatApprox",
+    "endpoint": "https://ec.europa.eu/taxation_customs/vies/services/checkVatService",
+    "authority": "VIES is the only authority on whether an ID is registered; local checks can only reject impossible IDs."
+  },
+  "countries": {
+    "AT": {
+      "format": "U\\d{8}",
+      "local_checksum": false,
+      "base_delay_seconds": 1.5
+    },
+    "BE": {
+      "format": "[01]\\d{9}",
+      "local_checksum": true,
+      "base_delay_seconds": 1.5
+    },
+    "BG": {
+      "format": "\\d{9,10}",
+      "local_checksum": false,
+      "base_delay_seconds": 1.5
+    },
+    "CY": {
+      "format": "\\d{8}[A-Z]",
+      "local_checksum": false,
+      "base_delay_seconds": 1.5
+    },
+    "CZ": {
+      "format": "\\d{8,10}",
+      "local_checksum": true,
+      "base_delay_seconds": 1.5
+    },
+    "DE": {
+      "format": "\\d{9}",
+      "local_checksum": false,
+      "base_delay_seconds": 1.5
+    },
+    "DK": {
+      "format": "\\d{8}",
+      "local_checksum": true,
+      "base_delay_seconds": 1.5
+    },
+    "EE": {
+      "format": "\\d{9}",
+      "local_checksum": false,
+      "base_delay_seconds": 1.5
+    },
+    "EL": {
+      "format": "\\d{9}",
+      "local_checksum": false,
+      "base_delay_seconds": 1.5
+    },
+    "ES": {
+      "format": "[A-Z0-9]\\d{7}[A-Z0-9]",
+      "local_checksum": false,
+      "base_delay_seconds": 1.5
+    },
+    "FI": {
+      "format": "\\d{8}",
+      "local_checksum": false,
+      "base_delay_seconds": 1.5
+    },
+    "FR": {
+      "format": "[A-Z0-9]{2}\\d{9}",
+      "local_checksum": true,
+      "base_delay_seconds": 5.0
+    },
+    "HR": {
+      "format": "\\d{11}",
+      "local_checksum": false,
+      "base_delay_seconds": 1.5
+    },
+    "HU": {
+      "format": "\\d{8}",
+      "local_checksum": false,
+      "base_delay_seconds": 1.5
+    },
+    "IE": {
+      "format": "(\\d{7}[A-Z]{1,2}|\\d[A-Z+*]\\d{5}[A-Z])",
+      "local_checksum": false,
+      "base_delay_seconds": 1.5
+    },
+    "IT": {
+      "format": "\\d{11}",
+      "local_checksum": false,
+      "base_delay_seconds": 1.5
+    },
+    "LT": {
+      "format": "(\\d{9}|\\d{12})",
+      "local_checksum": false,
+      "base_delay_seconds": 1.5
+    },
+    "LU": {
+      "format": "\\d{8}",
+      "local_checksum": false,
+      "base_delay_seconds": 1.5
+    },
+    "LV": {
+      "format": "\\d{11}",
+      "local_checksum": false,
+      "base_delay_seconds": 1.5
+    },
+    "MT": {
+      "format": "\\d{8}",
+      "local_checksum": false,
+      "base_delay_seconds": 1.5
+    },
+    "NL": {
+      "format": "\\d{9}B\\d{2}",
+      "local_checksum": false,
+      "base_delay_seconds": 1.5
+    },
+    "PL": {
+      "format": "\\d{10}",
+      "local_checksum": true,
+      "base_delay_seconds": 1.5
+    },
+    "PT": {
+      "format": "\\d{9}",
+      "local_checksum": false,
+      "base_delay_seconds": 1.5
+    },
+    "RO": {
+      "format": "\\d{2,10}",
+      "local_checksum": false,
+      "base_delay_seconds": 1.5
+    },
+    "SE": {
+      "format": "\\d{12}",
+      "local_checksum": false,
+      "base_delay_seconds": 1.5
+    },
+    "SI": {
+      "format": "\\d{8}",
+      "local_checksum": false,
+      "base_delay_seconds": 1.5
+    },
+    "SK": {
+      "format": "\\d{10}",
+      "local_checksum": false,
+      "base_delay_seconds": 1.5
+    },
+    "XI": {
+      "format": "(\\d{9}|\\d{12}|GD\\d{3}|HA\\d{3})",
+      "local_checksum": false,
+      "base_delay_seconds": 1.5
+    }
+  },
+  "countries_note": "Greece is 'EL' ('GR' is accepted and mapped). XI = Northern Ireland (goods). GB, CH, NO and other non-EU states are not covered by VIES.",
+  "input": {
+    "format": "CSV, UTF-8 (BOM ok)",
+    "vat_column_candidates": [
+      "vat_id",
+      "vat",
+      "vatid",
+      "vat_number",
+      "dic",
+      "dič",
+      "tax_id"
+    ],
+    "country_column_candidates": [
+      "country_code",
+      "country",
+      "country_iso",
+      "land"
+    ],
+    "optional_query_columns": {
+      "trader_name": [
+        "trader_name",
+        "company_name",
+        "name",
+        "nazev",
+        "název"
+      ],
+      "trader_company_type": [
+        "trader_company_type",
+        "company_type"
+      ],
+      "trader_street": [
+        "trader_street",
+        "street",
+        "ulice"
+      ],
+      "trader_postcode": [
+        "trader_postcode",
+        "postcode",
+        "psc",
+        "psč"
+      ],
+      "trader_city": [
+        "trader_city",
+        "city",
+        "mesto",
+        "město"
+      ]
+    },
+    "identifier_semantics": "A VAT ID (DIC), not a company registration number (ICO). A bare number is accepted only together with a country column, and only works where the national VAT number equals that bare number (e.g. 8-digit CZ legal entities: DIC = CZ + ICO).",
+    "optional_query_note": "When trader name/address columns are present, VIES also returns per-field match flags."
+  },
+  "output": {
+    "formats": [
+      "csv",
+      "jsonl"
+    ],
+    "columns": [
+      "input_vat_id",
+      "country_code",
+      "vat_number",
+      "status",
+      "trader_name",
+      "trader_address",
+      "trader_company_type",
+      "request_date",
+      "request_identifier",
+      "name_match",
+      "company_type_match",
+      "street_match",
+      "postcode_match",
+      "city_match",
+      "error_detail",
+      "checked_at",
+      "from_cache"
+    ],
+    "cz_columns_with_--cz-enrich": [
+      "cz_ares_name",
+      "cz_ares_address",
+      "cz_ares_dic",
+      "cz_unreliable_payer",
+      "cz_published_accounts",
+      "cz_enrich_error"
+    ],
+    "statuses": {
+      "valid": "VIES confirmed the number is currently registered.",
+      "not_valid": "VIES answered and the number is not registered (or not active).",
+      "invalid_format": "Rejected locally, impossible for that country. No VIES call was made.",
+      "error": "VIES could not give an answer after all retries. Not a verdict on the ID.",
+      "not_checked": "Run was interrupted before this row was processed."
+    },
+    "match_values": [
+      "not_processed",
+      "not_valid",
+      "valid"
+    ],
+    "null_semantics": "VIES returns '---' when a member state does not disclose a field; that is normalised to empty/null.",
+    "proof_of_check": "request_identifier is the VIES consultation number; keep it as evidence that the check was made on request_date."
+  },
+  "errors": {
+    "INVALID_INPUT": {
+      "retryable": false,
+      "meaning": "VIES rejected the country code or number format."
+    },
+    "INVALID_REQUESTER_INFO": {
+      "retryable": false,
+      "meaning": "The requester VAT ID (your own company) is wrong."
+    },
+    "VAT_BLOCKED": {
+      "retryable": false,
+      "meaning": "VIES blocked the requester VAT ID."
+    },
+    "IP_BLOCKED": {
+      "retryable": false,
+      "meaning": "VIES blocked this IP address."
+    },
+    "MISSING_COUNTRY_CODE": {
+      "retryable": false,
+      "meaning": "No country code could be determined."
+    },
+    "MS_UNAVAILABLE": {
+      "retryable": true,
+      "meaning": "The member state's national database is down or unreachable."
+    },
+    "MS_MAX_CONCURRENT_REQ": {
+      "retryable": true,
+      "meaning": "Concurrency ceiling of one member state reached (shared across all clients; slow down)."
+    },
+    "GLOBAL_MAX_CONCURRENT_REQ": {
+      "retryable": true,
+      "meaning": "Global VIES concurrency ceiling reached."
+    },
+    "SERVICE_UNAVAILABLE": {
+      "retryable": true,
+      "meaning": "VIES itself is unavailable."
+    },
+    "SERVER_BUSY": {
+      "retryable": true,
+      "meaning": "VIES is overloaded."
+    },
+    "TIMEOUT": {
+      "retryable": true,
+      "meaning": "Network error or timeout (client-side classification)."
+    },
+    "TECHNICAL_ERROR": {
+      "retryable": true,
+      "meaning": "Generic VIES fault; usually transient despite the name."
+    },
+    "IO_ERROR": {
+      "retryable": true,
+      "meaning": "Unparseable response (client-side classification)."
+    }
+  },
+  "retry_policy": {
+    "type": "deny-list (retry everything except non-retryable codes)",
+    "max_retries_per_call": 5,
+    "backoff_seconds": {
+      "base": 5.0,
+      "max": 90.0,
+      "jitter": 2
+    },
+    "second_pass_pace_multiplier": 2.0
+  },
+  "pacing": {
+    "model": "one sequential worker per country, countries in parallel",
+    "base_delay_seconds": 1.5,
+    "slow_countries": [
+      "FR"
+    ],
+    "slow_base_delay_seconds": 5.0,
+    "adaptive": "delay scales with error rate over last 10 calls (up to 4x), capped at 30.0s",
+    "circuit_breaker": {
+      "consecutive_failures": 3,
+      "base_cooldown_seconds": 90.0,
+      "max_cooldown_seconds": 900.0
+    },
+    "single_instance": "enforced by a lock file; VIES limits are shared across clients"
+  },
+  "cache": {
+    "default_max_age_days": 7,
+    "stores": [
+      "valid",
+      "not_valid"
+    ],
+    "reuse_requires": "same requester and same name/address query",
+    "flush": "every 10 new entries or 30s, atomic"
+  },
+  "exit_codes": {
+    "0": "all rows resolved (valid/not_valid/invalid_format)",
+    "1": "usage or fatal error",
+    "2": "finished, but some rows ended in 'error'",
+    "130": "interrupted, partial output written"
+  },
+  "optional_modules": {
+    "cz_enrichment": "ARES (name/address/DIC) and MF CR unreliable-payer register with published bank accounts, via --cz-enrich"
+  }
+}
